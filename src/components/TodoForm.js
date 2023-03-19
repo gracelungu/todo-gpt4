@@ -1,27 +1,38 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { capitalize } from '../helpers';
 
-function TodoForm({ addTodo }) {
+function TodoForm({ addTodo, editTodo, editingIndex, todos }) {
   const [inputValue, setInputValue] = useState('');
+  const [isEditing, setIsEditing] = useState(false);
 
-  const handleInputChange = (event) => {
-    setInputValue(event.target.value);
-  };
-
-  const handleFormSubmit = (event) => {
-    event.preventDefault();
-
-    if (!inputValue) {
-      return;
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    if (!inputValue) return;
+    if (isEditing) {
+      editTodo(editingIndex, inputValue);
+      setIsEditing(false);
+    } else {
+      addTodo(inputValue);
     }
-
-    addTodo(inputValue);
     setInputValue('');
   };
 
+  useEffect(() => {
+    if (editingIndex !== -1) {
+      setInputValue(todos[editingIndex]);
+      setIsEditing(true);
+    }
+  }, [editingIndex, todos]);
+
   return (
-    <form onSubmit={handleFormSubmit}>
-      <input type="text" value={inputValue} onChange={handleInputChange} />
-      <button type="submit">Add Todo</button>
+    <form onSubmit={handleSubmit}>
+      <input
+        type='text'
+        value={inputValue}
+        onChange={(e) => setInputValue(capitalize(e.target.value))}
+        placeholder='Add new todo'
+      />
+      <button type='submit'>{isEditing ? 'Edit' : 'Add'} Todo</button>
     </form>
   );
 }
